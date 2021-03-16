@@ -1,6 +1,15 @@
-cd /mnt/drived/code/stt/models/ && \
-    wget --no-check-certificate https://phon.ioc.ee/~tanela/tedlium_nnet_ms_sp_online.tgz && \
-    tar -zxvf tedlium_nnet_ms_sp_online.tgz && \
-    wget https://raw.githubusercontent.com/alumae/kaldi-gstreamer-server/py3/sample_english_nnet2.yaml -P /mnt/drived/code/stt/models/ && \
-    find /mnt/drived/code/stt/models/ -type f | xargs sed -i 's:test:/opt:g' && \
-    sed -i 's:full-post-processor:#full-post-processor:g' /mnt/drived/code/stt/models/sample_english_nnet2.yaml
+FROM macide/nvidia-kaldi-gstreamer
+
+# This is the practical example part
+
+RUN apt-get update && \
+    apt-get install -y supervisor && \
+    apt-get clean autoclean && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY startme.sh /opt/
+
+EXPOSE 80
+
+CMD ["/opt/startme.sh"]

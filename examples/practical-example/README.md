@@ -1,25 +1,33 @@
-# Working example with single docker file
-This docker file automates the process described in the practial end to end example.
-It is purely meant for creating a basic test system very quickly.
-It creates a single Docker Image and starts the Kaldi master and a single worker. It also downloads a model. 
-Due to the size of the model it may take a while to build this docker image.
+#Nvidia-kaldi-gstreamer example
 
-# Steps to run
-## Build the docker image
+1. Build
+    ```
+    docker build . --tag gstream
+    ```
+1. Run 
+    ```
+    ./download_models.sh
+    ```
+1. Next mount the created models folder to the docker on /opt/models.
+
+set -e ENV variables
+available options and default
+
+ENV |Description| Default Value
+--------|--------|--------
+PORT|Port for master|80
+MASTER|URL for master|localhost
+WORKERS|Number of workers|1
+
+
+To run an instance of master and 15 workers run this:
 ```
-docker build -t docker-kaldi-gstreamer-example:latest .
+./downloads_models.sh &&\ 
+docker run -d --rm -p 8080:80 -e WORKERS=15 -v $(PWD)/models:/opt/models --name gstreamer_15workers gstream
 ```
 
-## Run the docker image:
+To run an instance of just 15 workers and direct to different master on gstream.url:8080 run this:
 ```
-docker run -itd -p 8080:80 --shm-size=256m  docker-kaldi-gstreamer-example:latest 
-
-```
-
-## Test the install
-On your host machine, download a client example and test your setup with a given audio:
-```
-wget https://raw.githubusercontent.com/alumae/kaldi-gstreamer-server/master/kaldigstserver/client.py -P /tmp
-wget https://raw.githubusercontent.com/alumae/kaldi-gstreamer-server/master/test/data/bill_gates-TED.mp3 -P /tmp
-python /tmp/client.py -u ws://localhost:8080/client/ws/speech -r 8192 /tmp/bill_gates-TED.mp3
+./downloads_models.sh &&\ 
+docker run -d --rm -p 8080:80 -e MASTER=gstream.url -e PORT=8080 -e WORKERS=15 -v $(PWD)/models:/opt/models --name gstreamer_15workers gstream
 ```
